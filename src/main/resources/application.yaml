@@ -1,3 +1,8 @@
 spring:
   application:
     name: jfr-monitoring
+
+jfr-monitoring:
+  enabled: false
+  output-endpoint: ""
+  recording-interval-seconds: 60
