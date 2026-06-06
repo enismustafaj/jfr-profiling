@@ -6,7 +6,6 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 @ConfigurationProperties(prefix = "jfr-monitoring")
 public record JfrMonitoringConfiguration(
         @DefaultValue("false") boolean enabled,
-        @DefaultValue("") String outputEndpoint,
+        @DefaultValue(".") String outputEndpoint,
         @DefaultValue("60") long recordingIntervalSeconds) {
-
 }
