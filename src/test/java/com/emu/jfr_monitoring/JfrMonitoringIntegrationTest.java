@@ -16,11 +16,9 @@ class JfrMonitoringIntegrationTest {
         contextRunner.withPropertyValues("jfr-monitoring.enabled=true")
                 .withUserConfiguration(JfrMonitoringTestConfiguration.class)
                 .run(context -> {
-                    // Check if the beans are present in the context
-                    assert context.containsBean("pprofFileHandler");
-                    assert context.containsBean("jfrMonitoringRouter");
-                    assert context.containsBean("jfrRecordingService");
+
+                    JfrEventProducer eventProducer = context.getBean(JfrEventProducer.class);
+                    eventProducer.produceEvent();
                 });
     }
-
 }
