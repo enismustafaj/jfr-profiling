@@ -37,7 +37,7 @@ public class JfrRecordingRecorder implements InitializingBean, DisposableBean {
     @Override
     public void afterPropertiesSet() throws IOException, ParseException {
         stream = new RecordingStream(Configuration.getConfiguration("default"));
-        stream.onEvent("jdk.ExecutionSample", converter::addEvent);
+        stream.onEvent("com.emu.jfr_monitoring.events.SampleEvent", converter::addEvent);
         stream.startAsync();
         log.info("JFR recording started");
 
