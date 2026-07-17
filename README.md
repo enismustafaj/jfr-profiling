@@ -16,10 +16,22 @@ Each HTTP request produces its own pprof profile, so profiling overhead is scope
 
 ### 1. Add the dependency
 
-The library is not yet published to Maven Central. Build and install it locally:
+The library is available on [Maven Central](https://central.sonatype.com/artifact/io.github.enismustafaj/jfr-profiling) as `io.github.enismustafaj:jfr-profiling`.
 
-```bash
-./gradlew build
+Gradle:
+
+```groovy
+implementation 'io.github.enismustafaj:jfr-profiling:0.0.2'
+```
+
+Maven:
+
+```xml
+<dependency>
+    <groupId>io.github.enismustafaj</groupId>
+    <artifactId>jfr-profiling</artifactId>
+    <version>0.0.2</version>
+</dependency>
 ```
 
 ### 2. Enable in your application
