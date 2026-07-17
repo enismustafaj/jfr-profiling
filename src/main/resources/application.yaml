@@ -5,4 +5,3 @@ spring:
 jfr-monitoring:
   enabled: false
   output-endpoint: ""
-  recording-interval-seconds: 60

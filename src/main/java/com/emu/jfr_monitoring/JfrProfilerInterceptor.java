@@ -2,14 +2,9 @@ package com.emu.jfr_monitoring;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jdk.jfr.consumer.RecordedEvent;
-import jdk.jfr.consumer.RecordedThread;
-import jdk.jfr.consumer.RecordingStream;
+import jdk.jfr.Recording;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -21,10 +16,16 @@ class JfrProfilerInterceptor implements HandlerInterceptor {
         this.profileExporter = profileExporter;
     }
 
-    private static final String EXECUTION_SAMPLE_EVENT = "jdk.ExecutionSample";
-    private static final String STREAM_ATTR = "jfr.stream";
-    private static final String START_ATTR = "jfr.start";
+    // ponytail: jdk.CPUTimeSample (JEP 509, JDK 25+) samples via a per-thread CPU-time signal
+    // instead of safepoints, so tight/allocation-free code isn't silently under-sampled. It's
+    // Linux-only today; elsewhere we fall back to jdk.ExecutionSample, which IS safepoint-biased.
+    // Upgrade path: none needed once running on Linux, which is where this is meant to matter (prod).
+    static final boolean CPU_TIME_SAMPLING_SUPPORTED =
+            System.getProperty("os.name", "").toLowerCase().contains("linux");
+    static final String SAMPLE_EVENT = CPU_TIME_SAMPLING_SUPPORTED ? "jdk.CPUTimeSample" : "jdk.ExecutionSample";
 
+    private static final String RECORDING_ATTR = "jfr.recording";
+    private static final String THREAD_ID_ATTR = "jfr.threadId";
 
     @Override
     public boolean preHandle(
@@ -33,21 +34,16 @@ class JfrProfilerInterceptor implements HandlerInterceptor {
         Object handler
     ) {
 
-        RecordingStream stream = new RecordingStream();
-        stream.enable(EXECUTION_SAMPLE_EVENT).withPeriod(Duration.ofNanos(10));
+        Recording recording = new Recording();
+        if (CPU_TIME_SAMPLING_SUPPORTED) {
+            recording.enable(SAMPLE_EVENT).with("throttle", "10ms");
+        } else {
+            recording.enable(SAMPLE_EVENT).withPeriod(Duration.ofMillis(10));
+        }
+        recording.start();
 
-        long threadId = Thread.currentThread().threadId();
-        List<RecordedEvent> captured = Collections.synchronizedList(new ArrayList<>());
-
-        stream.onEvent("jdk.ExecutionSample", ev -> {
-            if (isSameThread(ev, threadId)) captured.add(ev);
-        });
-
-        stream.startAsync();
-
-        request.setAttribute(STREAM_ATTR, stream);
-        request.setAttribute(START_ATTR, System.nanoTime());
-        request.setAttribute("jfr.captured", captured);
+        request.setAttribute(RECORDING_ATTR, recording);
+        request.setAttribute(THREAD_ID_ATTR, Thread.currentThread().threadId());
         return true;
     }
 
@@ -59,21 +55,12 @@ class JfrProfilerInterceptor implements HandlerInterceptor {
         Exception ex
     ) {
 
-        RecordingStream stream = (RecordingStream) request.getAttribute(STREAM_ATTR);
-        long start = (long) request.getAttribute(START_ATTR);
-        @SuppressWarnings("unchecked")
-        List<RecordedEvent> captured = (List<RecordedEvent>) request.getAttribute("jfr.captured");
+        Recording recording = (Recording) request.getAttribute(RECORDING_ATTR);
+        long threadId = (long) request.getAttribute(THREAD_ID_ATTR);
 
-        long durationMillis = (System.nanoTime() - start) / 1_000_000;
-
-        stream.close();
-
-        String endpoint = request.getRequestURI();
-
+        recording.stop();
+        // ponytail: dump()/parse is real disk I/O, so it happens off this thread in
+        // ProfileExporter (virtual-thread executor), not here on the request thread.
+        profileExporter.exportAsync(recording, threadId);
     }
-
-    private boolean isSameThread(RecordedEvent ev, long threadId) {
-            RecordedThread t = ev.getThread();
-            return t != null && t.getJavaThreadId() == threadId;
-        }
 }

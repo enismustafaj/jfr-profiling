@@ -5,11 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 
 @Slf4j
-public class JfrMonitoringRouter {
+public class JfrProfilingRouter {
 
     private final List<JfrPprofHandler> handlers;
 
-    public JfrMonitoringRouter(List<JfrPprofHandler> handlers) {
+    public JfrProfilingRouter(List<JfrPprofHandler> handlers) {
         this.handlers = handlers;
     }
 
