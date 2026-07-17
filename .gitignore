@@ -29,3 +29,5 @@ build/
 # IDE
 .vscode/
 *.pb.gz
+.zed
+bin/

@@ -1,4 +1,4 @@
-package com.emu.jfr_monitoring.pprof;
+package com.emu.jfr_monitoring.handlers;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -10,7 +10,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Slf4j
-public class PprofFileWriter {
+class PprofFileWriter {
 
     private static final DateTimeFormatter TIMESTAMP_FMT = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
 

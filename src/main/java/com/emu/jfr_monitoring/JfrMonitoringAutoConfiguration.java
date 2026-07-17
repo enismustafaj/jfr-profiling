@@ -21,13 +21,7 @@ public class JfrMonitoringAutoConfiguration {
     }
 
     @Bean
-    public JfrMonitoringRouter jfrMonitoringRouter(List<JfrPprofHandler> handlers) {
-        return new JfrMonitoringRouter(handlers);
+    public JfrProfilingRouter jfrMonitoringRouter(List<JfrPprofHandler> handlers) {
+        return new JfrProfilingRouter(handlers);
     }
-
-    @Bean
-    public JfrRecordingRecorder jfrRecordingService(JfrMonitoringConfiguration config, JfrMonitoringRouter router) {
-        return new JfrRecordingRecorder(config, router);
-    }
-
 }

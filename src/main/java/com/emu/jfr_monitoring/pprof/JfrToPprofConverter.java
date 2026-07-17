@@ -1,23 +1,26 @@
 package com.emu.jfr_monitoring.pprof;
 
 import jdk.jfr.consumer.RecordedEvent;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.util.List;
 
+@Slf4j
 public class JfrToPprofConverter {
 
-    private ProfileBuilder current = new ProfileBuilder();
+    private final ProfileBuilder current = new ProfileBuilder();
 
-    public synchronized void addEvent(RecordedEvent event) {
-        current.addEvent(event);
-    }
-
-    public byte[] buildAndReset() throws IOException {
-        ProfileBuilder snapshot;
-        synchronized (this) {
-            snapshot = current;
-            current = new ProfileBuilder();
+    public byte[] processEvents(List<RecordedEvent> events) {
+        for (RecordedEvent event : events) {
+            current.addEvent(event);
         }
-        return snapshot.build();
+
+        try {
+            return current.build();
+        } catch (IOException e) {
+            log.error("Failed to build profile", e);
+            throw new RuntimeException("Failed to build profile", e);
+        }
     }
 }
