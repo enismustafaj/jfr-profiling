@@ -1,4 +1,4 @@
-package com.emu.jfr_monitoring.handlers;
+package com.emu.jfr_profiling.handlers;
 
 import lombok.extern.slf4j.Slf4j;
 

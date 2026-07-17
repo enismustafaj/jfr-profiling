@@ -1,4 +1,4 @@
-# jfr-monitoring
+# jfr-profiling
 
 > **Work in progress, not production ready.** APIs and configuration properties may change. See [Roadmap](#roadmap) for known gaps.
 
@@ -25,19 +25,19 @@ The library is not yet published to Maven Central. Build and install it locally:
 ### 2. Enable in your application
 
 ```yaml
-jfr-monitoring:
+jfr-profiling:
   enabled: true
   output-endpoint: /tmp/profiles   # directory where .pb.gz files are written
 ```
 
-The library activates only when `jfr-monitoring.enabled=true`, so it is safe to leave the dependency on the classpath in all environments.
+The library activates only when `jfr-profiling.enabled=true`, so it is safe to leave the dependency on the classpath in all environments.
 
 ## Configuration reference
 
 | Property | Default | Description |
 |---|---|---|
-| `jfr-monitoring.enabled` | `false` | Enable/disable the library |
-| `jfr-monitoring.output-endpoint` | `.` | Directory to write pprof files |
+| `jfr-profiling.enabled` | `false` | Enable/disable the library |
+| `jfr-profiling.output-endpoint` | `.` | Directory to write pprof files |
 
 ## Analysing profiles
 

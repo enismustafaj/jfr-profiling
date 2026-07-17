@@ -1,4 +1,4 @@
-package com.emu.jfr_monitoring.pprof;
+package com.emu.jfr_profiling.pprof;
 
 import com.google.perftools.profiles.ProfileProto.*;
 import jdk.jfr.consumer.RecordedEvent;

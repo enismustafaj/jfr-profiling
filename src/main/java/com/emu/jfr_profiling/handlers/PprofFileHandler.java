@@ -1,6 +1,6 @@
-package com.emu.jfr_monitoring.handlers;
+package com.emu.jfr_profiling.handlers;
 
-import com.emu.jfr_monitoring.JfrPprofHandler;
+import com.emu.jfr_profiling.JfrPprofHandler;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

@@ -1,4 +1,4 @@
-package com.emu.jfr_monitoring;
+package com.emu.jfr_profiling;
 
 public interface JfrPprofHandler {
 

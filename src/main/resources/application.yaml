@@ -1,7 +1,7 @@
 spring:
   application:
-    name: jfr-monitoring
+    name: jfr-profiling
 
-jfr-monitoring:
+jfr-profiling:
   enabled: false
   output-endpoint: ""

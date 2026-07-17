@@ -1,4 +1,4 @@
-package com.emu.jfr_monitoring;
+package com.emu.jfr_profiling;
 
 import lombok.extern.slf4j.Slf4j;
 

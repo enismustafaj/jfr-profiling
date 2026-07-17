@@ -1,4 +1,4 @@
-package com.emu.jfr_monitoring;
+package com.emu.jfr_profiling;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

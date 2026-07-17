@@ -1,4 +1,4 @@
-package com.emu.jfr_monitoring;
+package com.emu.jfr_profiling;
 
 import com.google.perftools.profiles.ProfileProto.Profile;
 import org.junit.jupiter.api.Test;
@@ -38,9 +38,9 @@ class JfrProfilingHttpIntegrationTest {
     static Path outputDir;
 
     @DynamicPropertySource
-    static void jfrMonitoringProperties(DynamicPropertyRegistry registry) {
-        registry.add("jfr-monitoring.enabled", () -> "true");
-        registry.add("jfr-monitoring.output-endpoint", () -> outputDir.toString());
+    static void jfrProfilingProperties(DynamicPropertyRegistry registry) {
+        registry.add("jfr-profiling.enabled", () -> "true");
+        registry.add("jfr-profiling.output-endpoint", () -> outputDir.toString());
     }
 
     @Autowired

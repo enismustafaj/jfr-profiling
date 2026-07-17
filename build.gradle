@@ -1,17 +1,32 @@
 plugins {
     id 'java'
+    id 'maven-publish'
+    id 'signing'
     id 'org.springframework.boot' version '4.0.6'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'com.google.protobuf' version '0.10.0'
 }
 
-group = 'com.emu'
-version = '0.0.1-SNAPSHOT'
+group = 'io.github.enismustafaj'
+// Releases are published with -PreleaseVersion=x.y.z (set by the publish workflow from the
+// git tag); everything else (local builds, snapshots) stays on the SNAPSHOT version below.
+version = findProperty('releaseVersion') ?: '0.0.1-SNAPSHOT'
 
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(25)
     }
+    withSourcesJar()
+    withJavadocJar()
+}
+
+// This is a library, not an application - publish a plain jar, not an executable fat jar.
+bootJar {
+    enabled = false
+}
+jar {
+    enabled = true
+    archiveClassifier = ''
 }
 
 repositories {
@@ -38,4 +53,47 @@ protobuf {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+
+            pom {
+                name = 'jfr-profiling'
+                description = 'Spring Boot auto-configuration that captures per-request JFR CPU profiles and exports them as pprof.'
+                url = 'https://github.com/enismustafaj/jfr-profiling'
+
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'enismustafaj'
+                        name = 'Enis Mustafaj'
+                        email = 'enismustafaj@gmail.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:https://github.com/enismustafaj/jfr-profiling.git'
+                    developerConnection = 'scm:git:git@github.com:enismustafaj/jfr-profiling.git'
+                    url = 'https://github.com/enismustafaj/jfr-profiling'
+                }
+            }
+        }
+    }
+}
+
+signing {
+    def signingKey = System.getenv('GPG_PRIVATE_KEY')
+    def signingPassword = System.getenv('GPG_PASSPHRASE')
+    // Only sign when the keys are available (CI); local builds/tests don't need them.
+    if (signingKey && signingPassword) {
+        useInMemoryPgpKeys(signingKey, signingPassword)
+        sign publishing.publications.mavenJava
+    }
 }

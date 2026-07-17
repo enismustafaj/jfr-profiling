@@ -1,4 +1,4 @@
-package com.emu.jfr_monitoring.pprof;
+package com.emu.jfr_profiling.pprof;
 
 import jdk.jfr.consumer.RecordedEvent;
 import lombok.extern.slf4j.Slf4j;

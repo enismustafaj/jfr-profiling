@@ -1,8 +1,8 @@
-package com.emu.jfr_monitoring;
+package com.emu.jfr_profiling;
 
-import com.emu.jfr_monitoring.config.JfrMonitoringConfiguration;
-import com.emu.jfr_monitoring.handlers.PprofFileHandler;
-import com.emu.jfr_monitoring.pprof.JfrToPprofConverter;
+import com.emu.jfr_profiling.config.JfrProfilingConfiguration;
+import com.emu.jfr_profiling.handlers.PprofFileHandler;
+import com.emu.jfr_profiling.pprof.JfrToPprofConverter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -14,17 +14,17 @@ import java.io.IOException;
 import java.util.List;
 
 @AutoConfiguration
-@EnableConfigurationProperties(JfrMonitoringConfiguration.class)
-@ConditionalOnProperty(prefix = "jfr-monitoring", name = "enabled", havingValue = "true")
-public class JfrMonitoringAutoConfiguration {
+@EnableConfigurationProperties(JfrProfilingConfiguration.class)
+@ConditionalOnProperty(prefix = "jfr-profiling", name = "enabled", havingValue = "true")
+public class JfrProfilingAutoConfiguration {
 
     @Bean
-    public JfrPprofHandler pprofFileHandler(JfrMonitoringConfiguration config) throws IOException {
+    public JfrPprofHandler pprofFileHandler(JfrProfilingConfiguration config) throws IOException {
         return new PprofFileHandler(config.outputEndpoint());
     }
 
     @Bean
-    public JfrProfilingRouter jfrMonitoringRouter(List<JfrPprofHandler> handlers) {
+    public JfrProfilingRouter jfrProfilingRouter(List<JfrPprofHandler> handlers) {
         return new JfrProfilingRouter(handlers);
     }
 
@@ -44,7 +44,7 @@ public class JfrMonitoringAutoConfiguration {
     }
 
     @Bean
-    public WebMvcConfigurer jfrMonitoringWebMvcConfigurer(JfrProfilerInterceptor jfrProfilerInterceptor) {
+    public WebMvcConfigurer jfrProfilingWebMvcConfigurer(JfrProfilerInterceptor jfrProfilerInterceptor) {
         return new WebMvcConfigurer() {
             @Override
             public void addInterceptors(InterceptorRegistry registry) {

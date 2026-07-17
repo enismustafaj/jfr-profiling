@@ -1,1 +1,15 @@
-rootProject.name = 'jfr-monitoring'
+plugins {
+    id 'com.gradleup.nmcp.settings' version '1.6.1'
+}
+
+nmcpSettings {
+    centralPortal {
+        username = System.getenv('MAVEN_CENTRAL_USERNAME')
+        password = System.getenv('MAVEN_CENTRAL_PASSWORD')
+        // USER_MANAGED: review and click "Publish" in central.sonatype.com after upload.
+        // Switch to AUTOMATIC once you trust the release process to skip that manual step.
+        publishingType = 'USER_MANAGED'
+    }
+}
+
+rootProject.name = 'jfr-profiling'

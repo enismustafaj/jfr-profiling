@@ -1,4 +1,4 @@
-package com.emu.jfr_monitoring;
+package com.emu.jfr_profiling;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,7 +11,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import com.emu.jfr_monitoring.pprof.JfrToPprofConverter;
+import com.emu.jfr_profiling.pprof.JfrToPprofConverter;
 
 import jdk.jfr.Recording;
 import jdk.jfr.consumer.RecordedEvent;
