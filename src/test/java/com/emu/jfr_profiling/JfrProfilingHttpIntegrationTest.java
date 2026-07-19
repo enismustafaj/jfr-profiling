@@ -22,7 +22,9 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,6 +43,7 @@ class JfrProfilingHttpIntegrationTest {
     static void jfrProfilingProperties(DynamicPropertyRegistry registry) {
         registry.add("jfr-profiling.enabled", () -> "true");
         registry.add("jfr-profiling.output-endpoint", () -> outputDir.toString());
+        registry.add("jfr-profiling.interceptor.excluded-endpoints", () -> "/health");
     }
 
     @Autowired
@@ -62,9 +65,32 @@ class JfrProfilingHttpIntegrationTest {
                 .anyMatch(vt -> profile.getStringTable((int) vt.getType()).equals("samples"));
     }
 
+    @Test
+    void excludedEndpointDoesNotProduceProfile() throws Exception {
+        MockMvc mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+
+        long filesBefore = countPprofFiles();
+        mockMvc.perform(get("/health")).andExpect(status().isOk());
+
+        Duration window = Duration.ofSeconds(5);
+        long deadline = System.nanoTime() + window.toNanos();
+        while (System.nanoTime() < deadline) {
+            assertThat(countPprofFiles())
+                    .as("excluded endpoint should never produce a pprof file")
+                    .isEqualTo(filesBefore);
+            Thread.sleep(50);
+        }
+    }
+
+    private static long countPprofFiles() throws IOException {
+        try (Stream<Path> files = Files.list(outputDir)) {
+            return files.filter(p -> p.toString().endsWith(".pb.gz")).count();
+        }
+    }
+
     private static Profile readProfile(Path pprofFile) throws IOException {
         byte[] gzipped = Files.readAllBytes(pprofFile);
-        try (var gzipIn = new GZIPInputStream(new ByteArrayInputStream(gzipped))) {
+        try (GZIPInputStream gzipIn = new GZIPInputStream(new ByteArrayInputStream(gzipped))) {
             return Profile.parseFrom(gzipIn);
         }
     }
@@ -73,8 +99,8 @@ class JfrProfilingHttpIntegrationTest {
         Duration timeout = Duration.ofSeconds(5);
         long deadline = System.nanoTime() + timeout.toNanos();
         while (System.nanoTime() < deadline) {
-            try (var files = Files.list(outputDir)) {
-                var match = files.filter(p -> p.toString().endsWith(".pb.gz")).findFirst();
+            try (Stream<Path> files = Files.list(outputDir)) {
+                Optional<Path> match = files.filter(p -> p.toString().endsWith(".pb.gz")).findFirst();
                 if (match.isPresent()) {
                     return match.get();
                 }
@@ -104,6 +130,11 @@ class JfrProfilingHttpIntegrationTest {
                     if (junk.size() > 1000) junk.clear();
                 }
                 return "done:" + junk.size();
+            }
+
+            @GetMapping("/health")
+            String health() {
+                return "ok";
             }
         }
     }

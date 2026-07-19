@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.emu.jfr_profiling.pprof.JfrToPprofConverter;
@@ -42,18 +42,24 @@ class ProfileExporter {
                 return;
             }
 
-            executor.submit(() -> {
-                try {
-                    List<RecordedEvent> captured = readSamplesForThread(recording, threadId);
-                    byte[] pprofBytes = jfrToPprofConverter.processEvents(captured);
-                    jfrProfilingRouter.route(pprofBytes);
-                } catch (Exception e) {
-                    log.warn("Failed to export profile for trace!", e);
-                } finally {
-                    recording.close();
-                    concurrencyLimiter.release();
-                }
-            });
+            try {
+                executor.submit(() -> {
+                    try {
+                        List<RecordedEvent> captured = readSamplesForThread(recording, threadId);
+                        byte[] pprofBytes = jfrToPprofConverter.processEvents(captured);
+                        jfrProfilingRouter.route(pprofBytes);
+                    } catch (Exception e) {
+                        log.warn("Failed to export profile for trace!", e);
+                    } finally {
+                        recording.close();
+                        concurrencyLimiter.release();
+                    }
+                });
+            } catch (RejectedExecutionException e) {
+                log.warn("Profile exporter is shutting down; dropping in-flight profile", e);
+                recording.close();
+                concurrencyLimiter.release();
+            }
         }
 
         private List<RecordedEvent> readSamplesForThread(Recording recording, long threadId) throws IOException {

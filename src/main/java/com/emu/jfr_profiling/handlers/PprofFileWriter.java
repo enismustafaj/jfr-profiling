@@ -23,7 +23,9 @@ class PprofFileWriter {
 
     public void write(byte[] pprof) throws IOException {
         String timestamp = TIMESTAMP_FMT.format(ZonedDateTime.now(ZoneOffset.UTC));
-        Path outputPath = outputDir.resolve("jfr-" + timestamp + ".pb.gz");
+
+        String unique = Long.toHexString(System.nanoTime());
+        Path outputPath = outputDir.resolve("jfr-" + timestamp + "-" + unique + ".pb.gz");
         Files.write(outputPath, pprof);
         log.info("pprof profile written to {}", outputPath);
     }
