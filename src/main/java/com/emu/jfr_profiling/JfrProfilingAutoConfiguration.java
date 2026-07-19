@@ -1,6 +1,7 @@
 package com.emu.jfr_profiling;
 
 import com.emu.jfr_profiling.config.JfrProfilingConfiguration;
+import com.emu.jfr_profiling.config.JfrProfilingInterceptorProperties;
 import com.emu.jfr_profiling.handlers.PprofFileHandler;
 import com.emu.jfr_profiling.pprof.JfrToPprofConverter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -14,7 +15,7 @@ import java.io.IOException;
 import java.util.List;
 
 @AutoConfiguration
-@EnableConfigurationProperties(JfrProfilingConfiguration.class)
+@EnableConfigurationProperties({JfrProfilingConfiguration.class, JfrProfilingInterceptorProperties.class})
 @ConditionalOnProperty(prefix = "jfr-profiling", name = "enabled", havingValue = "true")
 public class JfrProfilingAutoConfiguration {
 
@@ -39,8 +40,9 @@ public class JfrProfilingAutoConfiguration {
     }
 
     @Bean
-    public JfrProfilerInterceptor jfrProfilerInterceptor(ProfileExporter profileExporter) {
-        return new JfrProfilerInterceptor(profileExporter);
+    public JfrProfilerInterceptor jfrProfilerInterceptor(
+            ProfileExporter profileExporter, JfrProfilingInterceptorProperties jfrProfilingInterceptorProperties) {
+        return new JfrProfilerInterceptor(profileExporter, jfrProfilingInterceptorProperties);
     }
 
     @Bean
